@@ -1,4 +1,4 @@
-FROM java:8
+FROM openjdk:8u102-jdk
 ENV JAVA_HOME=/usr/lib/jvm/java-1.8.0-openjdk-amd64
 ENV SPRING_PROFILES_ACTIVE=cloud
 ENV PATH=$PATH:/hadoop-2.6.0/bin/
@@ -6,11 +6,10 @@ ENV HADOOP_CONF_DIR=/yarn-conf
 
 VOLUME /tmp
 
-ADD /src/main/docker/krb5.conf /etc/krb5.conf
-COPY / /h2o-provisioner/
+ADD krb5.conf /etc/krb5.conf
 
 RUN apt-get update --fix-missing
-RUN apt-get install -y npm nodejs python-pip r-base krb5-user maven
+RUN apt-get install -y npm nodejs python-pip r-base krb5-user
 RUN ln -s `which nodejs` /usr/bin/node
 RUN pip install tabulate
 
@@ -24,17 +23,14 @@ RUN mkdir /yarn-conf \
   && tar -xvf hadoop-2.6.0.tar.gz \
   && cp /h2o-3/h2o-hadoop/h2o-cdh5.4.2-assembly/build/libs/h2odriver.jar /h2odriver.jar
 
-RUN cd /h2o-provisioner \
-  && mvn clean package \
-  && cp /h2o-provisioner/target/h2o-provisioner-*[0-9].jar /app.jar
+ADD h2o-provisioner-*[0-9].jar /app.jar
 
 RUN cd / \
   && rm -rf /h2o-3 \
-  && rm -rf /h2o-provisioner \
   && rm -rf /h2o-3.0.1.7-cdh5.4.2* \
   && rm -rf /var/lib/apt/lists/*
 
-EXPOSE 8080 54310-54319
+EXPOSE 8080 30389-30398
 
 RUN ln -s -f /usr/lib/jvm/java-8-openjdk-amd64/jre/bin/java /etc/alternatives/java
 ENTRYPOINT ["java","-Djava.security.egd=file:/dev/./urandom","-jar","/app.jar"]

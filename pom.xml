@@ -8,7 +8,7 @@
 	<parent>
 		<groupId>org.trustedanalytics</groupId>
 		<artifactId>spring-project-template</artifactId>
-		<version>0.5.0</version>
+		<version>0.5.2</version>
 	</parent>
 
 	<properties>
@@ -25,6 +25,23 @@
 
 	<build>
 		<plugins>
+			<plugin>
+				<groupId>com.spotify</groupId>
+				<artifactId>docker-maven-plugin</artifactId>
+				<version>0.4.11</version>
+				<configuration>
+					<imageName>h2o-provisioner</imageName>
+					<dockerDirectory>src/main/docker</dockerDirectory>
+					<useConfigFile>true</useConfigFile>
+					<resources>
+						<resource>
+							<targetPath>/</targetPath>
+							<directory>${project.build.directory}</directory>
+							<include>${project.build.finalName}.jar</include>
+						</resource>
+					</resources>
+				</configuration>
+			</plugin>
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
