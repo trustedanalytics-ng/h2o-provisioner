@@ -30,7 +30,7 @@ RUN cd / \
   && rm -rf /h2o-3.0.1.7-cdh5.4.2* \
   && rm -rf /var/lib/apt/lists/*
 
-EXPOSE 8080 30389-30398
+EXPOSE 9090 30389-30398
 
 RUN ln -s -f /usr/lib/jvm/java-8-openjdk-amd64/jre/bin/java /etc/alternatives/java
 ENTRYPOINT ["java","-Djava.security.egd=file:/dev/./urandom","-jar","/app.jar"]
