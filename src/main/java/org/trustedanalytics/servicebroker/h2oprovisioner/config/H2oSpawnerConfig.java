@@ -14,6 +14,7 @@
 
 package org.trustedanalytics.servicebroker.h2oprovisioner.config;
 
+import java.io.IOException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -25,8 +26,6 @@ import org.trustedanalytics.servicebroker.h2oprovisioner.service.H2oSpawner;
 import org.trustedanalytics.servicebroker.h2oprovisioner.service.externals.H2oDriverExec;
 import org.trustedanalytics.servicebroker.h2oprovisioner.service.externals.H2oUiFileParser;
 import org.trustedanalytics.servicebroker.h2oprovisioner.service.externals.KinitExec;
-
-import java.io.IOException;
 
 @Configuration
 public class H2oSpawnerConfig {
@@ -72,7 +71,7 @@ public class H2oSpawnerConfig {
   @Bean
   @Profile({"cloud", "default"})
   public H2oDriverExec h2oDriverExec() {
-    return new H2oDriverExec(config.getYarnConfDir());
+    return new H2oDriverExec();
   }
 
   @Bean

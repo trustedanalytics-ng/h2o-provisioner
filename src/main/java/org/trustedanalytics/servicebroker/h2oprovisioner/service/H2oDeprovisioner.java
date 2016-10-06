@@ -13,21 +13,19 @@
  */
 package org.trustedanalytics.servicebroker.h2oprovisioner.service;
 
-import org.trustedanalytics.servicebroker.h2oprovisioner.cdhclients.DeprovisionerYarnClient;
-import org.trustedanalytics.servicebroker.h2oprovisioner.cdhclients.DeprovisionerYarnClientProvider;
-import org.trustedanalytics.servicebroker.h2oprovisioner.cdhclients.KerberosClient;
-import org.trustedanalytics.servicebroker.h2oprovisioner.rest.H2oDeprovisioningException;
-import org.trustedanalytics.servicebroker.h2oprovisioner.rest.JobNotFoundException;
-
+import java.io.IOException;
+import java.util.Map;
+import javax.security.auth.login.LoginException;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.exceptions.YarnException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.util.Map;
-import javax.security.auth.login.LoginException;
+import org.trustedanalytics.servicebroker.h2oprovisioner.cdhclients.DeprovisionerYarnClient;
+import org.trustedanalytics.servicebroker.h2oprovisioner.cdhclients.DeprovisionerYarnClientProvider;
+import org.trustedanalytics.servicebroker.h2oprovisioner.cdhclients.KerberosClient;
+import org.trustedanalytics.servicebroker.h2oprovisioner.rest.H2oDeprovisioningException;
+import org.trustedanalytics.servicebroker.h2oprovisioner.rest.JobNotFoundException;
 
 public class H2oDeprovisioner {
 
@@ -36,22 +34,22 @@ public class H2oDeprovisioner {
   private final String kerberosUser;
   private final KerberosClient kerberos;
   private final DeprovisionerYarnClientProvider yarnClientProvider;
+  private final Configuration hadoopConf;
 
   public H2oDeprovisioner(String kerberosUser, KerberosClient kerberos,
-      DeprovisionerYarnClientProvider yarnClientProvider) {
+      DeprovisionerYarnClientProvider yarnClientProvider, Configuration hadoopConf) {
     this.kerberos = kerberos;
     this.yarnClientProvider = yarnClientProvider;
     this.kerberosUser = kerberosUser;
+    this.hadoopConf = hadoopConf;
   }
-
 
   public String deprovisionInstance(String serviceInstanceId,
       Map<String, String> hadoopConfiguration, boolean kerberosOn)
           throws H2oDeprovisioningException, JobNotFoundException {
-    LOGGER.debug("Reading hadoop configuration...");
-    Configuration hadoopConf = new Configuration(false);
-    hadoopConfiguration.forEach(hadoopConf::set);
-    LOGGER.debug("Configuration read.");
+
+    LOGGER.warn("Please be informed that hadoopConfiguration passed from broker is not used anymore" +
+        "Config loaded from environment will be in operation for now");
 
     try {
       DeprovisionerYarnClient yarnClient;

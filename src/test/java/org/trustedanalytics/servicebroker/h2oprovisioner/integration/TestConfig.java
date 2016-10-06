@@ -14,6 +14,8 @@
 
 package org.trustedanalytics.servicebroker.h2oprovisioner.integration;
 
+import static org.mockito.Mockito.mock;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -27,8 +29,6 @@ import org.trustedanalytics.servicebroker.h2oprovisioner.service.H2oDeprovisione
 import org.trustedanalytics.servicebroker.h2oprovisioner.service.externals.H2oDriverExec;
 import org.trustedanalytics.servicebroker.h2oprovisioner.service.externals.H2oUiFileParser;
 import org.trustedanalytics.servicebroker.h2oprovisioner.service.externals.KinitExec;
-
-import static org.mockito.Mockito.mock;
 
 @Configuration
 @Profile("test")
@@ -69,12 +69,18 @@ public class TestConfig {
   }
 
   @Bean
+  public org.apache.hadoop.conf.Configuration hadoopConf() {
+    return new org.apache.hadoop.conf.Configuration(false);
+  }
+
+  @Bean
   @Autowired
   public H2oDeprovisioner getH2oDeprovisioner(KerberosProperties kerberosProperties,
-      KerberosClient kerberosClient,
-      DeprovisionerYarnClientProvider deprovisionerYarnClientProvider) {
+                                              KerberosClient kerberosClient,
+                                              DeprovisionerYarnClientProvider deprovisionerYarnClientProvider,
+                                              org.apache.hadoop.conf.Configuration hadoopConf) {
     return new H2oDeprovisioner(kerberosProperties.getUser(), kerberosClient,
-        deprovisionerYarnClientProvider);
+        deprovisionerYarnClientProvider, hadoopConf);
   }
 
   @Bean

@@ -13,22 +13,34 @@
  */
 package org.trustedanalytics.servicebroker.h2oprovisioner.config;
 
+import org.apache.hadoop.fs.Path;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
+import org.apache.hadoop.conf.Configuration;
 import org.springframework.context.annotation.Profile;
 import org.trustedanalytics.servicebroker.h2oprovisioner.cdhclients.DeprovisionerYarnClientProvider;
 import org.trustedanalytics.servicebroker.h2oprovisioner.cdhclients.KerberosClient;
 import org.trustedanalytics.servicebroker.h2oprovisioner.service.H2oDeprovisioner;
 
-@Configuration
+@org.springframework.context.annotation.Configuration
 @Profile({"cloud", "default"})
 public class H2oDeprovisionerConfig {
 
+  @Autowired
+  private ExternalConfiguration config;
+
+  @Bean
+  public Configuration hadoopConfig() {
+    Configuration toReturn = new Configuration();
+    String configurationPath = config.getYarnConfDir();
+    toReturn.addResource(new Path(configurationPath + "/yarn-site.xml"));
+    return toReturn;
+  }
+
   @Bean
   @Autowired
-  public H2oDeprovisioner getH2oDeprovisioner(KerberosProperties kerberosProperties) {
+  public H2oDeprovisioner getH2oDeprovisioner(KerberosProperties kerberosProperties, Configuration hadoopConfig) {
     return new H2oDeprovisioner(kerberosProperties.getUser(), new KerberosClient(kerberosProperties),
-        new DeprovisionerYarnClientProvider());
+        new DeprovisionerYarnClientProvider(), hadoopConfig);
   }
 }

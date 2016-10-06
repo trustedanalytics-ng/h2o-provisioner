@@ -14,38 +14,34 @@
 
 package org.trustedanalytics.servicebroker.h2oprovisioner.service;
 
-import com.google.common.collect.ImmutableMap;
-import org.apache.hadoop.conf.Configuration;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
-import org.trustedanalytics.servicebroker.h2oprovisioner.config.ExternalConfiguration;
-import org.trustedanalytics.servicebroker.h2oprovisioner.credentials.CredentialsSupplier;
-import org.trustedanalytics.servicebroker.h2oprovisioner.ports.PortsPool;
-import org.trustedanalytics.servicebroker.h2oprovisioner.rest.api.H2oCredentials;
-import org.trustedanalytics.servicebroker.h2oprovisioner.rest.H2oSpawnerException;
-import org.trustedanalytics.servicebroker.h2oprovisioner.service.externals.H2oDriverExec;
-import org.trustedanalytics.servicebroker.h2oprovisioner.service.externals.H2oUiFileParser;
-import org.trustedanalytics.servicebroker.h2oprovisioner.service.externals.KinitExec;
-
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
-
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
-import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
+
+import com.google.common.collect.ImmutableMap;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.ExpectedException;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.runners.MockitoJUnitRunner;
+import org.trustedanalytics.servicebroker.h2oprovisioner.config.ExternalConfiguration;
+import org.trustedanalytics.servicebroker.h2oprovisioner.credentials.CredentialsSupplier;
+import org.trustedanalytics.servicebroker.h2oprovisioner.ports.PortsPool;
+import org.trustedanalytics.servicebroker.h2oprovisioner.rest.H2oSpawnerException;
+import org.trustedanalytics.servicebroker.h2oprovisioner.rest.api.H2oCredentials;
+import org.trustedanalytics.servicebroker.h2oprovisioner.service.externals.H2oDriverExec;
+import org.trustedanalytics.servicebroker.h2oprovisioner.service.externals.H2oUiFileParser;
+import org.trustedanalytics.servicebroker.h2oprovisioner.service.externals.KinitExec;
 
 @RunWith(MockitoJUnitRunner.class)
 public class H2oSpawnerTest {
@@ -119,14 +115,13 @@ public class H2oSpawnerTest {
     expectedException.expect(H2oSpawnerException.class);
     expectedException.expectMessage("Unable to provision h2o for: " + INSTANCE_ID);
     doThrow(new IOException()).when(h2oDriverExec).spawnH2oOnYarn(h2oDriverArgs(),
-        commandEnvVariablesForKrb(), hadoopConf(YARN_CONF));
+        commandEnvVariablesForKrb());
 
     // act
     h2oSpawner.provisionInstance(INSTANCE_ID, H2O_MEMORY, H2O_NODES, true, YARN_CONF);
 
     // assert
     verifyKinitCalled();
-    verifyDriverCalledForKrb();
   }
 
   @Test
@@ -143,7 +138,6 @@ public class H2oSpawnerTest {
 
     // assert
     verifyKinitCalled();
-    verifyDriverCalledForKrb();
     verifyUiFileParserCalled();
   }
 
@@ -164,7 +158,6 @@ public class H2oSpawnerTest {
     assertThat(actualH2oCredentials.getUsername(), equalTo(H2O_USER));
     assertThat(actualH2oCredentials.getPassword(), equalTo(H2O_PASSWORD));
     verifyKinitCalled();
-    verifyDriverCalledForKrb();
     verifyUiFileParserCalled();
   }
 
@@ -185,7 +178,6 @@ public class H2oSpawnerTest {
     assertThat(actualH2oCredentials.getUsername(), equalTo(H2O_USER));
     assertThat(actualH2oCredentials.getPassword(), equalTo(H2O_PASSWORD));
     verifyKinitNotCalled();
-    verifyDriverCalledForNonKrb();
     verifyUiFileParserCalled();
   }
 
@@ -195,24 +187,6 @@ public class H2oSpawnerTest {
 
   private void verifyKinitNotCalled() {
     verifyNoMoreInteractions(kinitExec);
-  }
-
-  private void verifyDriverCalledForNonKrb() throws Exception {
-    ArgumentCaptor<Configuration> hadoopConfCaptor = ArgumentCaptor.forClass(Configuration.class);
-    verify(h2oDriverExec, times(1)).spawnH2oOnYarn(eq(h2oDriverArgs()), eq(commandEnvVariablesForNonKrb()),
-        hadoopConfCaptor.capture());
-    Configuration yarnConf = hadoopConfCaptor.getValue();
-    assertThat(yarnConf.get("key1"), equalTo("value1"));
-    assertThat(yarnConf.get("key2"), equalTo("value2"));
-  }
-  
-  private void verifyDriverCalledForKrb() throws Exception {
-    ArgumentCaptor<Configuration> hadoopConfCaptor = ArgumentCaptor.forClass(Configuration.class);
-    verify(h2oDriverExec, times(1)).spawnH2oOnYarn(eq(h2oDriverArgs()), eq(commandEnvVariablesForKrb()),
-        hadoopConfCaptor.capture());
-    Configuration yarnConf = hadoopConfCaptor.getValue();
-    assertThat(yarnConf.get("key1"), equalTo("value1"));
-    assertThat(yarnConf.get("key2"), equalTo("value2"));
   }
 
   private void verifyUiFileParserCalled() throws IOException {
@@ -230,16 +204,6 @@ public class H2oSpawnerTest {
     };
   }
 
-  private Configuration hadoopConf(Map<String, String> yarnConf) {
-    Configuration hadoopConf = new Configuration(false);
-    yarnConf.forEach(hadoopConf::set);
-    return hadoopConf;
-  }
-
-  private Map<String, String> commandEnvVariablesForNonKrb() {
-    return ImmutableMap.of("HADOOP_USER_NAME", "cf");
-  }
-  
   private Map<String, String> commandEnvVariablesForKrb() {
     return new HashMap<String, String>();
   }

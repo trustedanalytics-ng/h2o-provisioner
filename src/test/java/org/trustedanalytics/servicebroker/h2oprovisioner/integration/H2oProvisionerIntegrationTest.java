@@ -21,19 +21,11 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.util.MatcherAssertionErrors.assertThat;
 
-import org.trustedanalytics.servicebroker.h2oprovisioner.Application;
-import org.trustedanalytics.servicebroker.h2oprovisioner.config.ExternalConfiguration;
-import org.trustedanalytics.servicebroker.h2oprovisioner.rest.api.H2oCredentials;
-import org.trustedanalytics.servicebroker.h2oprovisioner.rest.api.H2oProvisionerRequestData;
-import org.trustedanalytics.servicebroker.h2oprovisioner.service.externals.H2oDriverExec;
-import org.trustedanalytics.servicebroker.h2oprovisioner.service.externals.H2oUiFileParser;
-import org.trustedanalytics.servicebroker.h2oprovisioner.service.externals.KinitExec;
-
 import com.google.common.collect.ImmutableMap;
-import org.apache.hadoop.conf.Configuration;
+import java.util.HashMap;
+import java.util.Map;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.IntegrationTest;
@@ -45,9 +37,13 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.web.client.RestOperations;
-
-import java.util.HashMap;
-import java.util.Map;
+import org.trustedanalytics.servicebroker.h2oprovisioner.Application;
+import org.trustedanalytics.servicebroker.h2oprovisioner.config.ExternalConfiguration;
+import org.trustedanalytics.servicebroker.h2oprovisioner.rest.api.H2oCredentials;
+import org.trustedanalytics.servicebroker.h2oprovisioner.rest.api.H2oProvisionerRequestData;
+import org.trustedanalytics.servicebroker.h2oprovisioner.service.externals.H2oDriverExec;
+import org.trustedanalytics.servicebroker.h2oprovisioner.service.externals.H2oUiFileParser;
+import org.trustedanalytics.servicebroker.h2oprovisioner.service.externals.KinitExec;
 
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -101,18 +97,13 @@ public class H2oProvisionerIntegrationTest {
 
     verify(kinitExec, times(1)).loginToKerberos();
 
-    ArgumentCaptor<Configuration> hadoopConfCaptor = ArgumentCaptor.forClass(Configuration.class);
     verify(h2oDriverExec, times(1)).spawnH2oOnYarn(eq(new String[] {"hadoop", "jar",
         conf.getH2oDriverJarpath(), "-driverif", conf.getH2oDriverIp(), "-driverport",
         String.valueOf(TestConfig.FAKE_DRIVER_CALLBACK_PORT), "-mapperXmx", MEMORY, "-nodes",
         NODES_COUNT, "-output", "/tmp/h2o/" + INSTANCE_ID, "-jobname", "H2O_BROKER_" + INSTANCE_ID,
         "-notify", "h2o_ui_" + INSTANCE_ID, "-username", TestConfig.FAKE_H2O_INSTANCE_USERNAME,
         "-password", TestConfig.FAKE_H2O_INSTANCE_PASSWORD, "-disown",}),
-        eq(new HashMap<String, String>()), 
-        hadoopConfCaptor.capture());
-    Configuration yarnConf = hadoopConfCaptor.getValue();
-    assertThat(yarnConf.get("key1"), equalTo("value1"));
-    assertThat(yarnConf.get("key2"), equalTo("value2"));
+        eq(new HashMap<String, String>()));
 
     verify(h2oUiFileParser, times(1)).getFlowUrl("h2o_ui_" + INSTANCE_ID);
   }

@@ -19,16 +19,15 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.google.common.collect.ImmutableMap;
 import java.io.IOException;
 import java.util.Map;
-
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.exceptions.YarnException;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.IntegrationTest;
@@ -43,8 +42,6 @@ import org.trustedanalytics.servicebroker.h2oprovisioner.Application;
 import org.trustedanalytics.servicebroker.h2oprovisioner.cdhclients.DeprovisionerYarnClient;
 import org.trustedanalytics.servicebroker.h2oprovisioner.cdhclients.DeprovisionerYarnClientProvider;
 import org.trustedanalytics.servicebroker.h2oprovisioner.cdhclients.KerberosClient;
-
-import com.google.common.collect.ImmutableMap;
 
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -87,16 +84,10 @@ public class H2oDeprovisionerIntegrationTest {
     ResponseEntity<String> entity = rest.postForEntity(
         baseUrl + "/rest/instances/" + INSTANCE_ID + "/delete", YARN_CONF, String.class);
 
-    // then
-    ArgumentCaptor<Configuration> hadoopConfCaptor = ArgumentCaptor.forClass(Configuration.class);
-    verify(kerberosClient).logInToKerberos(hadoopConfCaptor.capture());
-    assertEquals("value1", hadoopConfCaptor.getValue().get("key1"));
-    assertEquals("value2", hadoopConfCaptor.getValue().get("key2"));
-
+    //then
     verify(yarnClient).start();
     verify(yarnClient).getH2oJobId(INSTANCE_ID);
     verify(yarnClient).killApplication(applicationIdMock);
-    
     assertEquals(applicationIdMock.toString(), entity.getBody());
   }
 }
