@@ -11,6 +11,8 @@ h2o:
     portLowerBound: ${DRIVER_PORT_LOWER:54300}
     portUpperBound: ${DRIVER_PORT_UPPER:54319}
     jarPath: ./h2odriver.jar
+    subnet: ${H2O_SUBNET:127.0.0.1/32}
+    timeout: 300 #in seconds
   credentials:
     usernameLength: ${H2O_USERNAME_LENGTH:8}
     passwordLength: ${H2O_PASSWORD_LENGTH:12}

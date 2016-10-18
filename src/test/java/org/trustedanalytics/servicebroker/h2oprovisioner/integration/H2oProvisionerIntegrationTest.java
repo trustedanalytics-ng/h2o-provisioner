@@ -69,7 +69,7 @@ public class H2oProvisionerIntegrationTest {
 
   @Autowired
   public H2oUiFileParser h2oUiFileParser;
-  
+
   @Test
   public void testCreateServiceInstance_success_shouldReturnCreatedInstance() throws Exception {
     // arrange
@@ -97,12 +97,20 @@ public class H2oProvisionerIntegrationTest {
 
     verify(kinitExec, times(1)).loginToKerberos();
 
-    verify(h2oDriverExec, times(1)).spawnH2oOnYarn(eq(new String[] {"hadoop", "jar",
-        conf.getH2oDriverJarpath(), "-driverif", conf.getH2oDriverIp(), "-driverport",
-        String.valueOf(TestConfig.FAKE_DRIVER_CALLBACK_PORT), "-mapperXmx", MEMORY, "-nodes",
-        NODES_COUNT, "-output", "/tmp/h2o/" + INSTANCE_ID, "-jobname", "H2O_BROKER_" + INSTANCE_ID,
-        "-notify", "h2o_ui_" + INSTANCE_ID, "-username", TestConfig.FAKE_H2O_INSTANCE_USERNAME,
-        "-password", TestConfig.FAKE_H2O_INSTANCE_PASSWORD, "-disown",}),
+    verify(h2oDriverExec, times(1)).spawnH2oOnYarn(
+        eq(new String[]{"hadoop", "jar", conf.getH2oDriverJarpath(),
+            "-timeout", conf.getH2oServerStartTimeout(),
+            "-network", conf.getH2oDriverSubnet(),
+            "-driverif", conf.getH2oDriverIp(),
+            "-driverport", String.valueOf(TestConfig.FAKE_DRIVER_CALLBACK_PORT),
+            "-mapperXmx", MEMORY,
+            "-nodes", NODES_COUNT,
+            "-output", "/tmp/h2o/" + INSTANCE_ID,
+            "-jobname", "H2O_BROKER_" + INSTANCE_ID,
+            "-notify", "h2o_ui_" + INSTANCE_ID,
+            "-username", TestConfig.FAKE_H2O_INSTANCE_USERNAME,
+            "-password", TestConfig.FAKE_H2O_INSTANCE_PASSWORD,
+            "-disown",}),
         eq(new HashMap<String, String>()));
 
     verify(h2oUiFileParser, times(1)).getFlowUrl("h2o_ui_" + INSTANCE_ID);

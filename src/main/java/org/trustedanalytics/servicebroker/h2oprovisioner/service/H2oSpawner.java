@@ -47,8 +47,9 @@ public class H2oSpawner {
   private final H2oUiFileParser h2oUiFileParser;
 
   public H2oSpawner(ExternalConfiguration externalConfiguration, PortsPool portsPool,
-      CredentialsSupplier usernameSupplier, CredentialsSupplier passwordSupplier, KinitExec kinit,
-      H2oDriverExec h2oDriver, H2oUiFileParser h2oUiFileParser) {
+                    CredentialsSupplier usernameSupplier, CredentialsSupplier passwordSupplier,
+                    KinitExec kinit,
+                    H2oDriverExec h2oDriver, H2oUiFileParser h2oUiFileParser) {
 
     this.externalConfiguration = externalConfiguration;
     this.portsPool = portsPool;
@@ -60,15 +61,17 @@ public class H2oSpawner {
   }
 
   public H2oCredentials provisionInstance(String serviceInstanceId, String memory,
-      String nodesCount, boolean kerberos, Map<String, String> hadoopConfiguration)
+                                          String nodesCount, boolean kerberos,
+                                          Map<String, String> hadoopConfiguration)
       throws H2oSpawnerException {
 
     LOGGER.info("Trying to provision h2o for: " + serviceInstanceId);
     String user = usernameSupplier.get();
     String password = passwordSupplier.get();
 
-    LOGGER.warn("Please be informed that hadoopConfiguration passed from broker is not used anymore" +
-        "Config loaded from environment will be in operation for now");
+    LOGGER
+        .warn("Please be informed that hadoopConfiguration passed from broker is not used anymore" +
+            "Config loaded from environment will be in operation for now");
 
     try {
       String[] command = getH2oDriverCommand(serviceInstanceId, user, password, memory, nodesCount);
@@ -97,13 +100,21 @@ public class H2oSpawner {
   }
 
   private String[] getH2oDriverCommand(String serviceInstanceId, String user, String password,
-      String memory, String nodesCount) throws IOException {
+                                       String memory, String nodesCount) throws IOException {
 
-    return new String[] {"hadoop", "jar", externalConfiguration.getH2oDriverJarpath(), "-driverif",
-        externalConfiguration.getH2oDriverIp(), "-driverport", String.valueOf(portsPool.getPort()),
-        "-mapperXmx", memory, "-nodes", nodesCount, "-output", outputPath(serviceInstanceId),
-        "-jobname", jobName(serviceInstanceId), "-notify", h2oUiPath(serviceInstanceId),
-        "-username", user, "-password", password, "-disown",};
+    return new String[]{"hadoop", "jar", externalConfiguration.getH2oDriverJarpath(),
+        "-timeout", externalConfiguration.getH2oServerStartTimeout(),
+        "-network", externalConfiguration.getH2oDriverSubnet(),
+        "-driverif", externalConfiguration.getH2oDriverIp(),
+        "-driverport", String.valueOf(portsPool.getPort()),
+        "-mapperXmx", memory,
+        "-nodes", nodesCount,
+        "-output", outputPath(serviceInstanceId),
+        "-jobname", jobName(serviceInstanceId),
+        "-notify", h2oUiPath(serviceInstanceId),
+        "-username", user,
+        "-password", password,
+        "-disown",};
   }
 
   private String outputPath(String serviceInstanceId) {

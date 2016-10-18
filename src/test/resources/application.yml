@@ -12,6 +12,8 @@ h2o:
     portLowerBound: fakePortLower
     portUpperBound: fakePortUpper
     jarPath: fakeH2oJarPath
+    timeout: 10
+    subnet: 127.0.0.1/32
   credentials:
     usernameLength: 8
     passwordLength: 12

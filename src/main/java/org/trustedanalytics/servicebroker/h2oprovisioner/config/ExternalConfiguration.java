@@ -58,4 +58,12 @@ public class ExternalConfiguration {
   @Value("${nokrb.default.username}")
   @NotNull
   private String nokrbDefaultUsername;
+
+  @Value("${h2o.driver.timeout}")
+  @NotNull
+  private String h2oServerStartTimeout;
+
+  @Value("${h2o.driver.subnet}")
+  @NotNull
+  private String h2oDriverSubnet;
 }

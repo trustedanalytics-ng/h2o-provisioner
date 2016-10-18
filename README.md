@@ -127,6 +127,7 @@ Parameters:
 * KRB_REALM - here you should set Kerberos REALM name.
 * KRB_USER - here you should set name of Kerberos user.
 * KRB_PASSWORD - here you should set password of Kerberos user.
+* H2O_SUBNET - here place subnet with CDH workers inside (eg. 10.20.0.0/16). It will be used by h2odriver.jar to conclude what flowUI address to return for provisioner. Warning: We assume that all workers are in the same subnet.
 
 ### Call h2o-provisioner from curl:
 ```
