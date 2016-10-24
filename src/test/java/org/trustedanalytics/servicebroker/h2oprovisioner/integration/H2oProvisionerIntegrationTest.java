@@ -88,7 +88,7 @@ public class H2oProvisionerIntegrationTest {
 
     // assert
     assertThat(h2oCredentialsEntity.getStatusCode(), equalTo(HttpStatus.OK));
-    assertThat(h2oCredentialsEntity.getBody().getHostname(), equalTo("qwerty.com"));
+    assertThat(h2oCredentialsEntity.getBody().getHostname(), equalTo("http://qwerty.com"));
     assertThat(h2oCredentialsEntity.getBody().getPort(), equalTo("80"));
     assertThat(h2oCredentialsEntity.getBody().getUsername(),
         equalTo(TestConfig.FAKE_H2O_INSTANCE_USERNAME));

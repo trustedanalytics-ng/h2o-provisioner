@@ -83,6 +83,7 @@ public class H2oSpawnerTest {
     config.setH2oDriverJarpath(DRIVER_JAR_PATH);
     config.setH2oDriverIp(DRIVER_IP);
     config.setNokrbDefaultUsername("cf");
+    config.setH2oServerProtocol("http://");
 
     when(portsPool.getPort()).thenReturn(DRIVER_CALLBACK_PORT);
     when(usernameSupplier.get()).thenReturn(H2O_USER);
@@ -153,7 +154,7 @@ public class H2oSpawnerTest {
         h2oSpawner.provisionInstance(INSTANCE_ID, H2O_MEMORY, H2O_NODES, true, YARN_CONF);
 
     // assert
-    assertThat(actualH2oCredentials.getHostname(), equalTo("127.0.0.1"));
+    assertThat(actualH2oCredentials.getHostname(), equalTo("http://127.0.0.1"));
     assertThat(actualH2oCredentials.getPort(), equalTo("54321"));
     assertThat(actualH2oCredentials.getUsername(), equalTo(H2O_USER));
     assertThat(actualH2oCredentials.getPassword(), equalTo(H2O_PASSWORD));
@@ -173,7 +174,7 @@ public class H2oSpawnerTest {
         h2oSpawner.provisionInstance(INSTANCE_ID, H2O_MEMORY, H2O_NODES, false, YARN_CONF);
 
     // assert
-    assertThat(actualH2oCredentials.getHostname(), equalTo("127.0.0.1"));
+    assertThat(actualH2oCredentials.getHostname(), equalTo("http://127.0.0.1"));
     assertThat(actualH2oCredentials.getPort(), equalTo("54321"));
     assertThat(actualH2oCredentials.getUsername(), equalTo(H2O_USER));
     assertThat(actualH2oCredentials.getPassword(), equalTo(H2O_PASSWORD));

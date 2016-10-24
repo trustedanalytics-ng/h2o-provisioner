@@ -6,6 +6,7 @@ kerberos:
   confFile: /etc/krb5.conf
 
 h2o:
+  serverProtocolPrefix: http://
   driver:
     ip: ${DRIVER_IP:127.0.0.1}
     portLowerBound: ${DRIVER_PORT_LOWER:54300}

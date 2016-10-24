@@ -66,4 +66,8 @@ public class ExternalConfiguration {
   @Value("${h2o.driver.subnet}")
   @NotNull
   private String h2oDriverSubnet;
+
+  @Value("${h2o.serverProtocolPrefix}")
+  @NotNull
+  private String h2oServerProtocol;
 }

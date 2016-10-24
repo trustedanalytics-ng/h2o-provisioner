@@ -130,7 +130,7 @@ public class H2oSpawner {
   }
 
   private String getAddress(String host) {
-    return host.split(":")[0];
+    return externalConfiguration.getH2oServerProtocol() + host.split(":")[0];
   }
 
   private String getPort(String host) {
