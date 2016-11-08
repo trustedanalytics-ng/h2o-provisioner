@@ -48,11 +48,13 @@ public class H2oSpawnerRestController {
       @RequestParam(required = false, defaultValue = "on") String kerberos,
       @RequestBody H2oProvisionerRequestData parameters) throws H2oSpawnerException {
 
+    //TODO: kerberos and parameters arguments are no longer necessary.
+    //They shall be removed from h2o-broker client side and could be deleted from this method.
+
     //Make use of this parameter while doing task DPNG-6358
     LOGGER.debug("User token passed: " + parameters.getUserToken());
 
-    return h2oSpawner.provisionInstance(instanceId, memory, nodesCount, "on".equals(kerberos),
-        parameters.getYarnConfig());
+    return h2oSpawner.provisionInstance(instanceId, memory, nodesCount);
   }
 
   @RequestMapping(value = "rest/instances/{instanceId}/delete", method = RequestMethod.POST)
@@ -60,6 +62,10 @@ public class H2oSpawnerRestController {
       @RequestBody Map<String, String> hadoopConf,
       @RequestParam(required = false, defaultValue = "on") String kerberos)
       throws H2oDeprovisioningException, JobNotFoundException {
-    return h2oDeprovisioner.deprovisionInstance(instanceId, hadoopConf, "on".equals(kerberos));
+
+    //TODO: kerberos and hadoopConf arguments are no longer necessary.
+    //They shall be removed from h2o-broker client side and could be deleted from this method.
+
+    return h2oDeprovisioner.deprovisionInstance(instanceId);
   }
 }

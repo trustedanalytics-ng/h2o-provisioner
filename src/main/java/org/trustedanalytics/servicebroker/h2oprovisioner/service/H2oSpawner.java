@@ -17,7 +17,6 @@ package org.trustedanalytics.servicebroker.h2oprovisioner.service;
 import com.google.common.collect.ImmutableMap;
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import org.slf4j.Logger;
@@ -45,6 +44,8 @@ public class H2oSpawner {
   private final KinitExec kinit;
   private final H2oDriverExec h2oDriver;
   private final H2oUiFileParser h2oUiFileParser;
+  private final Map<String, String> envExecutionVariables;
+  private final boolean kerberos;
 
   public H2oSpawner(ExternalConfiguration externalConfiguration, PortsPool portsPool,
                     CredentialsSupplier usernameSupplier, CredentialsSupplier passwordSupplier,
@@ -58,11 +59,14 @@ public class H2oSpawner {
     this.kinit = kinit;
     this.h2oDriver = h2oDriver;
     this.h2oUiFileParser = h2oUiFileParser;
+    this.kerberos = externalConfiguration.isKerberosEnabled();
+    this.envExecutionVariables =
+        this.kerberos ? ImmutableMap.of() : ImmutableMap.of(HADOOP_USER_NAME_ENV_VAR,
+            externalConfiguration.getNokrbDefaultUsername());
   }
 
   public H2oCredentials provisionInstance(String serviceInstanceId, String memory,
-                                          String nodesCount, boolean kerberos,
-                                          Map<String, String> hadoopConfiguration)
+                                          String nodesCount)
       throws H2oSpawnerException {
 
     LOGGER.info("Trying to provision h2o for: " + serviceInstanceId);
@@ -79,11 +83,8 @@ public class H2oSpawner {
 
       if (kerberos) {
         kinit.loginToKerberos();
-        h2oDriver.spawnH2oOnYarn(command, new HashMap<String, String>());
-      } else {
-        h2oDriver.spawnH2oOnYarn(command, ImmutableMap.of(HADOOP_USER_NAME_ENV_VAR,
-            externalConfiguration.getNokrbDefaultUsername()));
       }
+      h2oDriver.spawnH2oOnYarn(command, this.envExecutionVariables);
 
       // TODO: what if exception will be thrown by getFlowUrl?
       // should we kill h2o on yarn = undo step: spawnH2oOnYarn?

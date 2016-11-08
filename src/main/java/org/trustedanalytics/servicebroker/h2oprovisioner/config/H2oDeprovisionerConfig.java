@@ -13,6 +13,7 @@
  */
 package org.trustedanalytics.servicebroker.h2oprovisioner.config;
 
+import java.util.Optional;
 import org.apache.hadoop.fs.Path;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -40,7 +41,14 @@ public class H2oDeprovisionerConfig {
   @Bean
   @Autowired
   public H2oDeprovisioner getH2oDeprovisioner(KerberosProperties kerberosProperties, Configuration hadoopConfig) {
-    return new H2oDeprovisioner(kerberosProperties.getUser(), new KerberosClient(kerberosProperties),
+    return new H2oDeprovisioner(kerberosProperties.getUser(), createKerberos(kerberosProperties),
         new DeprovisionerYarnClientProvider(), hadoopConfig);
+  }
+
+  private Optional<KerberosClient> createKerberos(KerberosProperties properties) {
+    if(!properties.isEnabled()) {
+      return Optional.empty();
+    }
+    return Optional.of(new KerberosClient(properties));
   }
 }

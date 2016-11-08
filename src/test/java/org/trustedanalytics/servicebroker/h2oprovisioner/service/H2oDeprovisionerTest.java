@@ -22,6 +22,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
+import java.util.Optional;
 import javax.security.auth.login.LoginException;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
@@ -43,7 +44,7 @@ public class H2oDeprovisionerTest {
   private DeprovisionerYarnClientProvider yarnClientProviderMock =
       mock(DeprovisionerYarnClientProvider.class);
   private DeprovisionerYarnClient yarnClientMock = mock(DeprovisionerYarnClient.class);
-  private KerberosClient kerberosClientMock = mock(KerberosClient.class);
+  private Optional<KerberosClient> kerberosClientMock = Optional.of(mock(KerberosClient.class));
   private final String kerberosUser = "askfap";
   private final String testInstanceId = "sljad-akjdf";
   private ApplicationId applicationIdMock = mock(ApplicationId.class);
@@ -55,7 +56,7 @@ public class H2oDeprovisionerTest {
   public void setUp() throws Exception {
     when(yarnClientMock.getH2oJobId(testInstanceId)).thenReturn(applicationIdMock);
     when(yarnClientProviderMock.getClient(any(), any())).thenReturn(yarnClientMock);
-    when(kerberosClientMock.logInToKerberos(any())).thenReturn(hadoopConf);
+    when(kerberosClientMock.get().logInToKerberos(any())).thenReturn(hadoopConf);
   }
 
   @Test
@@ -65,7 +66,7 @@ public class H2oDeprovisionerTest {
         new H2oDeprovisioner(kerberosUser, kerberosClientMock, yarnClientProviderMock, hadoopConf);
 
     // when
-    String killedJobId = sut.deprovisionInstance(testInstanceId, null, true);
+    String killedJobId = sut.deprovisionInstance(testInstanceId);
 
     // then
     verify(yarnClientProviderMock).getClient(kerberosUser, hadoopConf);
@@ -79,28 +80,28 @@ public class H2oDeprovisionerTest {
   public void deprovisionInstanceForKrb_KerberosClientThrowsLoginException_ExceptionThrown()
       throws Exception {
     // given
-    when(kerberosClientMock.logInToKerberos(any())).thenThrow(new LoginException());
+    when(kerberosClientMock.get().logInToKerberos(any())).thenThrow(new LoginException());
     H2oDeprovisioner sut =
         new H2oDeprovisioner(kerberosUser, kerberosClientMock, yarnClientProviderMock, hadoopConf);
 
     // when
     //then
     thrown.expect(H2oDeprovisioningException.class);
-    sut.deprovisionInstance(testInstanceId, null, true);
+    sut.deprovisionInstance(testInstanceId);
   }
   
   @Test
   public void deprovisionInstanceForKrb_KerberosClientThrowsIOException_ExceptionThrown()
       throws Exception {
     // given
-    when(kerberosClientMock.logInToKerberos(any())).thenThrow(new IOException());
+    when(kerberosClientMock.get().logInToKerberos(any())).thenThrow(new IOException());
     H2oDeprovisioner sut =
         new H2oDeprovisioner(kerberosUser, kerberosClientMock, yarnClientProviderMock, hadoopConf);
 
     // when
     //then
     thrown.expect(H2oDeprovisioningException.class);
-    sut.deprovisionInstance(testInstanceId, null, true);
+    sut.deprovisionInstance(testInstanceId);
   }
   
   @Test
@@ -114,7 +115,7 @@ public class H2oDeprovisionerTest {
     // when
     //then
     thrown.expect(H2oDeprovisioningException.class);
-    sut.deprovisionInstance(testInstanceId, null, true);
+    sut.deprovisionInstance(testInstanceId);
   }
 
   
@@ -129,7 +130,7 @@ public class H2oDeprovisionerTest {
     // when
     //then
     thrown.expect(H2oDeprovisioningException.class);
-    sut.deprovisionInstance(testInstanceId, null, true);
+    sut.deprovisionInstance(testInstanceId);
   }
   
   @Test
@@ -143,7 +144,7 @@ public class H2oDeprovisionerTest {
     // when
     //then
     thrown.expect(H2oDeprovisioningException.class);
-    sut.deprovisionInstance(testInstanceId, null, true);
+    sut.deprovisionInstance(testInstanceId);
   }
   
   @Test
@@ -157,6 +158,6 @@ public class H2oDeprovisionerTest {
     // when
     //then
     thrown.expect(H2oDeprovisioningException.class);
-    sut.deprovisionInstance(testInstanceId, null, true);
+    sut.deprovisionInstance(testInstanceId);
   }
 }

@@ -70,4 +70,7 @@ public class ExternalConfiguration {
   @Value("${h2o.serverProtocolPrefix}")
   @NotNull
   private String h2oServerProtocol;
+
+  @Value("${kerberos.enabled}")
+  private boolean kerberosEnabled;
 }

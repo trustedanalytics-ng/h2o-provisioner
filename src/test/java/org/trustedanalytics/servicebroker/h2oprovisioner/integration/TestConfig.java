@@ -16,6 +16,7 @@ package org.trustedanalytics.servicebroker.h2oprovisioner.integration;
 
 import static org.mockito.Mockito.mock;
 
+import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -76,7 +77,7 @@ public class TestConfig {
   @Bean
   @Autowired
   public H2oDeprovisioner getH2oDeprovisioner(KerberosProperties kerberosProperties,
-                                              KerberosClient kerberosClient,
+                                              Optional<KerberosClient> kerberosClient,
                                               DeprovisionerYarnClientProvider deprovisionerYarnClientProvider,
                                               org.apache.hadoop.conf.Configuration hadoopConf) {
     return new H2oDeprovisioner(kerberosProperties.getUser(), kerberosClient,
@@ -84,8 +85,8 @@ public class TestConfig {
   }
 
   @Bean
-  public KerberosClient kerberosClient() {
-    return mock(KerberosClient.class);
+  public Optional<KerberosClient> kerberosClient() {
+    return Optional.of(mock(KerberosClient.class));
   }
 
   @Bean

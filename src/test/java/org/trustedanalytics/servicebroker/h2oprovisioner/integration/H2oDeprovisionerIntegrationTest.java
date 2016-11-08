@@ -22,6 +22,7 @@ import static org.mockito.Mockito.when;
 import com.google.common.collect.ImmutableMap;
 import java.io.IOException;
 import java.util.Map;
+import java.util.Optional;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.exceptions.YarnException;
@@ -57,7 +58,7 @@ public class H2oDeprovisionerIntegrationTest {
   private RestOperations rest = new TestRestTemplate();
 
   @Autowired
-  public KerberosClient kerberosClient;
+  public Optional<KerberosClient> kerberosClient;
 
   @Autowired
   public DeprovisionerYarnClientProvider yarnClientProvider;
@@ -78,7 +79,7 @@ public class H2oDeprovisionerIntegrationTest {
     // given
     when(yarnClientProvider.getClient(any(), any())).thenReturn(yarnClient);
     when(yarnClient.getH2oJobId(INSTANCE_ID)).thenReturn(applicationIdMock);
-    when(kerberosClient.logInToKerberos(any())).thenReturn(hadoopConf);
+    when(kerberosClient.get().logInToKerberos(any())).thenReturn(hadoopConf);
 
     // when
     ResponseEntity<String> entity = rest.postForEntity(

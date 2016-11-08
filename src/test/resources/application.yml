@@ -1,6 +1,7 @@
 server.port: 0
 
 kerberos:
+  enabled: True
   kdc: fakeKdc
   realm: fakeRealm
   user: fakeKrbUser

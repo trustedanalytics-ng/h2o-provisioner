@@ -41,8 +41,9 @@ public class H2oSpawnerConfig {
 
   @Bean
   public H2oSpawner getH2oSpawner(CredentialsSupplier usernameSupplier,
-      CredentialsSupplier passwordSupplier, KinitExec kinitExec, H2oDriverExec h2oDriverExec,
-      H2oUiFileParser h2oUiFileParser) {
+                                  CredentialsSupplier passwordSupplier, KinitExec kinitExec,
+                                  H2oDriverExec h2oDriverExec,
+                                  H2oUiFileParser h2oUiFileParser) {
 
     return new H2oSpawner(config, portsPool, usernameSupplier, passwordSupplier, kinitExec,
         h2oDriverExec, h2oUiFileParser);
@@ -65,6 +66,9 @@ public class H2oSpawnerConfig {
   @Bean
   @Profile({"cloud", "default"})
   public KinitExec kinitExec() throws IOException {
+    if (!kerberosProperties.isEnabled()) {
+      return null;
+    }
     return new KinitExec(kerberosProperties);
   }
 

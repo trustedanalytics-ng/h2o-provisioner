@@ -1,4 +1,5 @@
 kerberos:
+  enabled: ${KRB_ENABLED:false}
   kdc: ${KRB_KDC:kdc}
   realm: ${KRB_REALM:realm}
   user: ${KRB_USER:user}
@@ -20,7 +21,7 @@ h2o:
 
 #do not change name of "HADOOP_CONF_DIR" env variable - hadoop cmd client is also using it
 yarn.conf.dir: ${HADOOP_CONF_DIR:/yarn-conf}
-nokrb.default.username: cf
+nokrb.default.username: broker
 
 logging:
   level:

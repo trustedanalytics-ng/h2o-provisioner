@@ -14,7 +14,7 @@
 package org.trustedanalytics.servicebroker.h2oprovisioner.service;
 
 import java.io.IOException;
-import java.util.Map;
+import java.util.Optional;
 import javax.security.auth.login.LoginException;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
@@ -32,56 +32,55 @@ public class H2oDeprovisioner {
   private static final Logger LOGGER = LoggerFactory.getLogger(H2oDeprovisioner.class);
 
   private final String kerberosUser;
-  private final KerberosClient kerberos;
+  private final Optional<KerberosClient> kerberos;
   private final DeprovisionerYarnClientProvider yarnClientProvider;
   private final Configuration hadoopConf;
 
-  public H2oDeprovisioner(String kerberosUser, KerberosClient kerberos,
-      DeprovisionerYarnClientProvider yarnClientProvider, Configuration hadoopConf) {
+  public H2oDeprovisioner(String kerberosUser, Optional<KerberosClient> kerberos,
+                          DeprovisionerYarnClientProvider yarnClientProvider,
+                          Configuration hadoopConf) {
     this.kerberos = kerberos;
     this.yarnClientProvider = yarnClientProvider;
     this.kerberosUser = kerberosUser;
     this.hadoopConf = hadoopConf;
   }
 
-  public String deprovisionInstance(String serviceInstanceId,
-      Map<String, String> hadoopConfiguration, boolean kerberosOn)
-          throws H2oDeprovisioningException, JobNotFoundException {
+  public String deprovisionInstance(String serviceInstanceId)
+      throws H2oDeprovisioningException, JobNotFoundException {
 
-    LOGGER.warn("Please be informed that hadoopConfiguration passed from broker is not used anymore" +
-        "Config loaded from environment will be in operation for now");
+    LOGGER
+        .warn("Please be informed that hadoopConfiguration passed from broker is not used anymore" +
+            "Config loaded from environment will be in operation for now");
 
     try {
       DeprovisionerYarnClient yarnClient;
       LOGGER.debug("Creating yarn client...");
-      if (kerberosOn) {
-        Configuration loggedHadoopConf = logInAndGetConfig(hadoopConf);
-        yarnClient = yarnClientProvider.getClient(kerberosUser, loggedHadoopConf);
-      } else {
-        yarnClient = yarnClientProvider.getClient(kerberosUser, hadoopConf);
-      }
-      LOGGER.debug("Yarn client created.");
+      Configuration conf = getConfiguration(hadoopConf);
 
+      yarnClient = yarnClientProvider.getClient(kerberosUser, conf);
+      LOGGER.debug("Yarn client created.");
       return deprovisionH2o(yarnClient, serviceInstanceId);
-      
     } catch (IOException e) {
       throw new H2oDeprovisioningException(
           "Unable to create yarn client." + e.getMessage(), e);
     }
   }
 
-  private Configuration logInAndGetConfig(Configuration hadoopConf)
+  private Configuration getConfiguration(Configuration hadoopConf)
       throws H2oDeprovisioningException {
-    LOGGER.debug("Logging in to Kerberos...");
-    try {
-      return kerberos.logInToKerberos(hadoopConf);
-    } catch (LoginException | IOException e) {
-      throw new H2oDeprovisioningException("Unable to log in: " + e.getMessage(), e);
+    if (kerberos.isPresent()) {
+      LOGGER.debug("Logging in to Kerberos is necessary to acquire config...");
+      try {
+        return kerberos.get().logInToKerberos(hadoopConf);
+      } catch (LoginException | IOException e) {
+        throw new H2oDeprovisioningException("Unable to log in: " + e.getMessage(), e);
+      }
     }
+    return hadoopConf;
   }
 
   private String deprovisionH2o(DeprovisionerYarnClient yarnClient, String serviceInstanceId)
-          throws H2oDeprovisioningException, JobNotFoundException {
+      throws H2oDeprovisioningException, JobNotFoundException {
     try {
       LOGGER.debug("Starting yarn client...");
       yarnClient.start();
@@ -89,8 +88,7 @@ public class H2oDeprovisioner {
 
       LOGGER.debug("Extracting job Id...");
       ApplicationId h2oServerJobId = yarnClient.getH2oJobId(serviceInstanceId);
-      LOGGER.debug("Extracted job id: " + h2oServerJobId.toString());
-      LOGGER.debug("Killing job with id: " + h2oServerJobId.toString());
+      LOGGER.debug("Concluded id of job to kill: " + h2oServerJobId.toString());
       yarnClient.killApplication(h2oServerJobId);
       LOGGER.debug("Job " + h2oServerJobId + " killed.");
       return h2oServerJobId.toString();

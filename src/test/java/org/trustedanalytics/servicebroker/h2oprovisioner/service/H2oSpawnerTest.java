@@ -79,18 +79,24 @@ public class H2oSpawnerTest {
 
   @Before
   public void setup() throws IOException {
+    prepareSpawner(true);
+  }
+
+  private void prepareSpawner(boolean kerberosEnabled) throws IOException {
     ExternalConfiguration config = new ExternalConfiguration();
     config.setH2oDriverJarpath(DRIVER_JAR_PATH);
     config.setH2oDriverIp(DRIVER_IP);
     config.setNokrbDefaultUsername("cf");
     config.setH2oServerProtocol("http://");
+    config.setKerberosEnabled(kerberosEnabled);
 
     when(portsPool.getPort()).thenReturn(DRIVER_CALLBACK_PORT);
     when(usernameSupplier.get()).thenReturn(H2O_USER);
     when(passwordSupplier.get()).thenReturn(H2O_PASSWORD);
 
-    h2oSpawner = new H2oSpawner(config, portsPool, usernameSupplier, passwordSupplier, kinitExec,
-        h2oDriverExec, h2oUiFileParser);
+    h2oSpawner =
+        new H2oSpawner(config, portsPool, usernameSupplier, passwordSupplier, kinitExec,
+            h2oDriverExec, h2oUiFileParser);
   }
 
   @Rule
@@ -104,7 +110,7 @@ public class H2oSpawnerTest {
     doThrow(new IOException()).when(kinitExec).loginToKerberos();
 
     // act
-    h2oSpawner.provisionInstance(INSTANCE_ID, H2O_MEMORY, H2O_NODES, true, YARN_CONF);
+    h2oSpawner.provisionInstance(INSTANCE_ID, H2O_MEMORY, H2O_NODES);
 
     // assert
     verifyKinitCalled();
@@ -119,7 +125,7 @@ public class H2oSpawnerTest {
         commandEnvVariablesForKrb());
 
     // act
-    h2oSpawner.provisionInstance(INSTANCE_ID, H2O_MEMORY, H2O_NODES, true, YARN_CONF);
+    h2oSpawner.provisionInstance(INSTANCE_ID, H2O_MEMORY, H2O_NODES);
 
     // assert
     verifyKinitCalled();
@@ -135,7 +141,7 @@ public class H2oSpawnerTest {
     doThrow(new FileNotFoundException()).when(h2oUiFileParser).getFlowUrl("h2o_ui_" + INSTANCE_ID);
 
     // act
-    h2oSpawner.provisionInstance(INSTANCE_ID, H2O_MEMORY, H2O_NODES, true, YARN_CONF);
+    h2oSpawner.provisionInstance(INSTANCE_ID, H2O_MEMORY, H2O_NODES);
 
     // assert
     verifyKinitCalled();
@@ -151,7 +157,7 @@ public class H2oSpawnerTest {
 
     // act
     H2oCredentials actualH2oCredentials =
-        h2oSpawner.provisionInstance(INSTANCE_ID, H2O_MEMORY, H2O_NODES, true, YARN_CONF);
+        h2oSpawner.provisionInstance(INSTANCE_ID, H2O_MEMORY, H2O_NODES);
 
     // assert
     assertThat(actualH2oCredentials.getHostname(), equalTo("http://127.0.0.1"));
@@ -167,11 +173,12 @@ public class H2oSpawnerTest {
       throws Exception {
 
     // arrange
+    prepareSpawner(false);
     when(h2oUiFileParser.getFlowUrl("h2o_ui_" + INSTANCE_ID)).thenReturn("127.0.0.1:54321");
 
     // act
     H2oCredentials actualH2oCredentials =
-        h2oSpawner.provisionInstance(INSTANCE_ID, H2O_MEMORY, H2O_NODES, false, YARN_CONF);
+        h2oSpawner.provisionInstance(INSTANCE_ID, H2O_MEMORY, H2O_NODES);
 
     // assert
     assertThat(actualH2oCredentials.getHostname(), equalTo("http://127.0.0.1"));
@@ -195,7 +202,7 @@ public class H2oSpawnerTest {
   }
 
   private String[] h2oDriverArgs() {
-    return new String[] {
+    return new String[]{
         // @formatter:off
         "hadoop", "jar", DRIVER_JAR_PATH, "-driverif", DRIVER_IP, "-driverport",
         String.valueOf(DRIVER_CALLBACK_PORT), "-mapperXmx", H2O_MEMORY, "-nodes", H2O_NODES,

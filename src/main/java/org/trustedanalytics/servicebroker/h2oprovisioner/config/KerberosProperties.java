@@ -27,6 +27,7 @@ import lombok.Setter;
 public class KerberosProperties {
   protected static final String PREFIX = "kerberos";
 
+  private boolean enabled;
   private String kdc;
   private String realm;
   private String user;
