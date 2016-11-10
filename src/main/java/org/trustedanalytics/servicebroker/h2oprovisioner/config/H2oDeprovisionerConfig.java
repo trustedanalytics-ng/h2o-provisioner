@@ -34,6 +34,9 @@ public class H2oDeprovisionerConfig {
   public Configuration hadoopConfig() {
     Configuration toReturn = new Configuration();
     String configurationPath = config.getYarnConfDir();
+    toReturn.addResource(new Path(configurationPath + "/core-site.xml"));
+    toReturn.addResource(new Path(configurationPath + "/hdfs-site.xml"));
+    toReturn.addResource(new Path(configurationPath + "/mapred-site.xml"));
     toReturn.addResource(new Path(configurationPath + "/yarn-site.xml"));
     return toReturn;
   }
