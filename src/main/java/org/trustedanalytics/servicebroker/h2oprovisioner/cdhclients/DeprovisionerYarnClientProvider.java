@@ -23,11 +23,10 @@ import org.trustedanalytics.hadoop.config.client.helper.UgiWrapper;
 
 public class DeprovisionerYarnClientProvider {
 
-  public DeprovisionerYarnClientProvider() {}
-  
   public DeprovisionerYarnClient getClient(String user, Configuration hadoopConf) throws IOException{
     String ticketCachePath = hadoopConf.get("hadoop.security.kerberos.ticket.cache.path");
     UserGroupInformation ugi = UserGroupInformation.getBestUGI(ticketCachePath, user);
+    UserGroupInformation.setLoginUser(ugi);
     YarnClient client = new DelegatingYarnClient(YarnClient.createYarnClient(), new UgiWrapper(ugi));
     client.init(hadoopConf);
     
